@@ -29,7 +29,7 @@ class AuthController extends Controller
             ]);
         }
 
-        $user = IoUser::where('id', $username)->first();
+        $user = IoUser::find($username);
 
         // if (!$user || !Hash::check($request->password, $user->password)) {
         if (!$user || $password !== $user->password) {
@@ -51,7 +51,25 @@ class AuthController extends Controller
             'token' => $token,
         ]);
     }
+    public function checkUsername(Request $request) {
+        $username = $request->username;
 
+        if (!$username) {
+            return response()->json([
+                'code' => 204,
+                'message' => "Username harus diisi!"
+            ]);
+        }
+        $user = IoUser::find($username);
+        if (!$user) {
+            return response()->json(['code' => 401, 'message' => 'Invalid credentials'], 401);
+        }
+
+        return response()->json([
+            'code' => 200,
+            'message' => 'Ok',
+        ]);
+    }
     public function check(Request $request)
     {
         $data = Crypt::decrypt($request->header('Authorization'));
@@ -72,5 +90,11 @@ class AuthController extends Controller
         } else {
             return response()->json(['code' => 200, 'message' => 'Ok check', 'expired' => $expired->toDateTimeString()], 200);
         }
+    }
+    public function test(){
+        return response()->json([
+            'code' => 200,
+            'message' => 'Ok',
+        ]);
     }
 }
