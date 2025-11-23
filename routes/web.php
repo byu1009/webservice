@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Jkn\JknSuratkontrolController;
+use App\Http\Controllers\Jkn\JknTaskidController;
 use App\Http\Controllers\Master\PasienController;
 use App\Http\Controllers\Master\DokterController;
 use App\Http\Controllers\Master\PoliklinikController;
@@ -31,6 +32,15 @@ Route::middleware(['api_token'])->group(function () {
         Route::controller(JknSuratkontrolController::class)->group(function () {
             Route::post('/surkon/getdata', 'getdata');
         });
+
+        Route::prefix('taskid')->group(function () {
+            Route::controller(JknTaskidController::class)->group(function () {
+                Route::post('/post', 'post');
+                //buat update pengiriman taskid
+            });
+        });
+
+        //buat add antrian farmasi
     });
 
     Route::prefix('registrasi')->group(function () {
@@ -64,7 +74,6 @@ Route::middleware(['api_token'])->group(function () {
             Route::post('/destroy', 'destroy');
         });
     });
-
 
     Route::get('/master/poliklinik', action: [PoliklinikController::class, 'index']);
     Route::post('/master/poliklinik', action: [PoliklinikController::class, 'store']);
