@@ -64,6 +64,8 @@ Route::middleware(['api_token'])->group(function () {
             Route::get('/bahasa-pasien', 'bahasapasien');
             Route::get('/cacat-fisik', 'cacatfisik');
             Route::get('/propinsi', 'propinsi');
+            Route::get('/provinsi', 'provinsi');
+            Route::post('/ambil-wilayah', 'getWilayah');
         });
     });
 
