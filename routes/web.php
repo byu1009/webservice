@@ -27,69 +27,55 @@ Route::middleware(['api_token'])->group(function () {
         Route::get('/user', 'index');
     });
 
-    Route::prefix('jkn')->group(function () {
-        Route::controller(JknSuratkontrolController::class)->group(function () {
-            Route::post('/surkon/getdata', 'getdata');
-        });
-
-        Route::prefix('taskid')->group(function () {
-            Route::controller(JknTaskidController::class)->group(function () {
-                Route::post('/post', 'post');
-                Route::post('/data', 'getdata');
-                Route::post('/send', 'send');
-            });
-        });
+    Route::controller(JknSuratkontrolController::class)->group(function () {
+        Route::post('/jkn/surkon/getdata', 'getdata');
     });
 
-    Route::prefix('registrasi')->group(function () {
-        Route::controller(RegistrasiController::class)->group(function () {
-            Route::post('/getdata', 'getdata');
-            Route::post('/post', 'post');
-            Route::post('/add-antrol', 'addantrian');
-            Route::post('/batal-periksa', 'batalPeriksa');
-            Route::post('/add-antrol-farmasi', 'addAntrianFarmasi');
-        });
+    Route::controller(JknTaskidController::class)->group(function () {
+        Route::post('/jkn/taskid/post', 'post');
+        Route::post('/jkn/taskid/data', 'getdata');
+        Route::post('/jkn/taskid/send', 'send');
     });
 
-    Route::prefix('ref')->group(function () {
-        Route::controller(ReferensiController::class)->group(function () {
-            Route::get('/penjab', 'penjab');
-            Route::post('/kelurahan', 'kelurahan');
-            Route::post('/kecamatan', 'kecamatan');
-            Route::post('/kabupaten', 'kabupaten');
-            Route::get('/perusahaan-pasien', 'perusahaanpasien');
-            Route::get('/suku-bangsa', 'sukubangsa');
-            Route::get('/bahasa-pasien', 'bahasapasien');
-            Route::get('/cacat-fisik', 'cacatfisik');
-            Route::get('/propinsi', 'propinsi');
-            Route::get('/provinsi', 'provinsi');
-            Route::post('/ambil-wilayah', 'getWilayah');
-        });
+    Route::controller(RegistrasiController::class)->group(function () {
+        Route::post('/registrasi/getdata', 'getdata');
+        Route::post('/registrasi/post', 'post');
+        Route::post('/registrasi/add-antrol', 'addantrian');
+        Route::post('/registrasi/batal-periksa', 'batalPeriksa');
+        Route::post('/registrasi/add-antrol-farmasi', 'addAntrianFarmasi');
     });
 
-    Route::prefix('pasien')->group(function () {
-        Route::controller(PasienController::class)->group(function () {
-            Route::get('/getdata', 'getdata');
-            Route::post('/search', 'searchPasien');
-            Route::post('/create', 'createPasien');
-            Route::post('/destroy', 'destroy');
-        });
+    Route::controller(ReferensiController::class)->group(function () {
+        Route::get('/ref/penjab', 'penjab');
+        Route::post('/ref/kelurahan', 'kelurahan');
+        Route::post('/ref/kecamatan', 'kecamatan');
+        Route::post('/ref/kabupaten', 'kabupaten');
+        Route::get('/ref/perusahaan-pasien', 'perusahaanpasien');
+        Route::get('/ref/suku-bangsa', 'sukubangsa');
+        Route::get('/ref/bahasa-pasien', 'bahasapasien');
+        Route::get('/ref/cacat-fisik', 'cacatfisik');
+        Route::get('/ref/propinsi', 'propinsi');
+        Route::get('/ref/provinsi', 'provinsi');
+        Route::post('/ref/ambil-wilayah', 'getWilayah');
     });
 
-    Route::prefix('erm')->group(function () { // pendding dulu
-        Route::prefix('data-klinis')->group(function () {
-            Route::controller(RiwayatController::class)->group(function () {
-                Route::post('/riwayat/getdata', 'getdata');
-                Route::post('/riwayat/soap', 'soapie');
-                Route::post('/riwayat/soap/multi', 'soapiemulti');
-                Route::post('/riwayat/sepbpjs', 'datasep');
-                Route::post('/riwayat/awal/medis', 'awalMedis');
-                Route::post('/riwayat/awal/keperawatan', 'awalKeperawatan');
-                Route::post('/riwayat/diagnosa-icd10', 'diagnosaIcd10');
-                Route::post('/riwayat/tindakan/dokter/rajal', 'tindakanDokterRajal');
-                Route::post('/riwayat/detail-pemberian-obat', 'detailPemberianObat');
-            });
-        });
+    Route::controller(PasienController::class)->group(function () {
+        Route::get('/pasien/getdata', 'getdata');
+        Route::post('/pasien/search', 'searchPasien');
+        Route::post('/pasien/create', 'createPasien');
+        Route::post('/pasien/destroy', 'destroy');
+    });
+
+    Route::controller(RiwayatController::class)->group(function () {
+        Route::post('/erm/data-klinis/riwayat/getdata', 'getdata');
+        Route::post('/erm/data-klinis/riwayat/soap', 'soapie');
+        Route::post('/erm/data-klinis/riwayat/soap/multi', 'soapiemulti');
+        Route::post('/erm/data-klinis/riwayat/sepbpjs', 'datasep');
+        Route::post('/erm/data-klinis/riwayat/awal/medis', 'awalMedis');
+        Route::post('/erm/data-klinis/riwayat/awal/keperawatan', 'awalKeperawatan');
+        Route::post('/erm/data-klinis/riwayat/diagnosa-icd10', 'diagnosaIcd10');
+        Route::post('/erm/data-klinis/riwayat/tindakan/dokter/rajal', 'tindakanDokterRajal');
+        Route::post('/erm/data-klinis/riwayat/detail-pemberian-obat', 'detailPemberianObat');
     });
 
     Route::get('/master/poliklinik', action: [PoliklinikController::class, 'index']);
@@ -98,21 +84,19 @@ Route::middleware(['api_token'])->group(function () {
     Route::post('/master/dokter', action: [DokterController::class, 'store']);
 });
 
-Route::prefix('api-antrol')->group(function () {
-    Route::controller(JknApiAntrolController::class)->group(function () {
-        Route::get('/ref/poli', 'refPoli');
-        Route::get('/ref/dokter', 'refDokter');
-        Route::post('/ref/jadwal-dokter', 'refJadwalDokter');
-        Route::get('/ref/poli-fp', 'refPoliFP');
-        Route::post('/ref/pasien-fp', 'refPasienFP');
-        Route::post('/antrian-tanggal', 'antrianPerTgl');
-        Route::post('/antrian-nobooking', 'antrianPerKbo');
-        Route::get('/antrian-aktif', 'antrianAktif');
-        Route::post('/antrian-nobooking-detail', 'antrianAktifDetail');
-        Route::post('/antrian/taskid', 'listTaskid');
-        Route::post('/antrian/updatewaktu', 'updateWaktuAntrian');
-        Route::post('/daftar/antrian', 'daftarAntrian');
-        Route::post('/daftar/antrian/farmasi', 'daftarAntrianFarmasi');
-        Route::post('/batal/antrian', 'batalAntrean');
-    });
+Route::controller(JknApiAntrolController::class)->group(function () {
+    Route::get('/api-antrol/ref/poli', 'refPoli');
+    Route::get('/api-antrol/ref/dokter', 'refDokter');
+    Route::post('/api-antrol/ref/jadwal-dokter', 'refJadwalDokter');
+    Route::get('/api-antrol/ref/poli-fp', 'refPoliFP');
+    Route::post('/api-antrol/ref/pasien-fp', 'refPasienFP');
+    Route::post('/api-antrol/antrian-tanggal', 'antrianPerTgl');
+    Route::post('/api-antrol/antrian-nobooking', 'antrianPerKbo');
+    Route::get('/api-antrol/antrian-aktif', 'antrianAktif');
+    Route::post('/api-antrol/antrian-nobooking-detail', 'antrianAktifDetail');
+    Route::post('/api-antrol/antrian/taskid', 'listTaskid');
+    Route::post('/api-antrol/antrian/updatewaktu', 'updateWaktuAntrian');
+    Route::post('/api-antrol/daftar/antrian', 'daftarAntrian');
+    Route::post('/api-antrol/daftar/antrian/farmasi', 'daftarAntrianFarmasi');
+    Route::post('/api-antrol/batal/antrian', 'batalAntrean');
 });
