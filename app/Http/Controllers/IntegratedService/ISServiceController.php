@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\IntegratedService;
 
+use App\Helpers\BPer;
 use App\Http\Controllers\Controller;
 use App\Models\IoAntrian;
 use App\Models\ReferensiMobilejknBpjs;
@@ -74,5 +75,11 @@ class ISServiceController extends Controller
         ];
 
         return $data;
+    }
+
+    public function jadwalPoli(Request $request) {
+        $hari = BPer::tebakHari(date('Y-m-d'));
+
+        return $hari;
     }
 }
