@@ -83,6 +83,7 @@ Route::middleware(['api_token'])->group(function () {
         Route::get('is/service', 'index');
         Route::post('is/service/poli/post-antrian', 'poliAntrianPost');
         Route::get('is/service/jadwal/poli', 'jadwalPoli');
+        Route::post('is/service/antrian/periksa', 'antrianPeriksa');
     });
 
     Route::get('/master/poliklinik', action: [PoliklinikController::class, 'index']);

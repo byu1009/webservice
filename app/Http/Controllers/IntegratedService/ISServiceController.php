@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\IntegratedService;
 
+use App\Helpers\AuthHelper;
 use App\Helpers\BPer;
 use App\Http\Controllers\Controller;
 use App\Models\IoAntrian;
+use App\Models\Jadwal;
 use App\Models\ReferensiMobilejknBpjs;
 use App\Models\RegPeriksaModel;
 use Illuminate\Http\Request;
@@ -77,9 +79,78 @@ class ISServiceController extends Controller
         return $data;
     }
 
-    public function jadwalPoli(Request $request) {
+    public function jadwalPoli() {
         $hari = BPer::tebakHari(date('Y-m-d'));
 
-        return $hari;
+        $caridata = Jadwal::where('hari_kerja', $hari)->get();
+
+        $data = [];
+        $dokterCache=[];
+        $poliCache = [];
+
+        foreach ($caridata as $v) {
+            if (!isset($dokterCache[$v->kd_dokter])) {
+                $dokterCache[$v->kd_dokter] =
+                    $v->dokter ? $v->dokter->only(['kd_dokter', 'nm_dokter']) : null;
+            }
+
+            if (!isset($poliCache[$v->kd_poli])) {
+                $poliCache[$v->kd_poli] =
+                    $v->poli ? $v->poli->only(['kd_poli', 'nm_poli']) : null;
+            }
+
+            $data[] = [
+                'hari' => $v->hari_kerja,
+                'dokter' => $dokterCache[$v->kd_dokter],
+                'poli' => $poliCache[$v->kd_poli],
+                'tanggal' => date('Y-m-d'),
+                'jam' => '(' . $v->jam_mulai .'-' . $v->jam_selesai . ')'
+            ];
+        }
+
+        return response()->json([
+            'code'=> 200,
+            'message'=> 'ok',
+            'counter'=>$caridata->count(),
+            'data'=> $data,
+            'token' => AuthHelper::genToken(),
+        ]);
+    }
+
+    public function antrianPeriksa(Request $request) {
+        $rules = [
+            'dokter' => 'required|string',
+            'poli'   => 'required|string',
+            'tanggal'   => 'required|string',
+        ];
+
+        $messages = [
+            'required' => ':attribute tidak boleh kosong',
+            'string'   => ':attribute harus berupa string',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'code'    => 201,
+                'message' => $validator->errors()->first()
+            ]);
+        }
+
+        $tgl = $request->tanggal;
+        $dokter = $request->dokter;
+        $poli = $request->poli;
+
+        $cari = RegPeriksaModel::where('tgl_registrasi',$tgl)->where('kd_dokter', $dokter)->where('kd_poli', $poli)->get();
+
+        if ($cari->isEmpty()) {
+            return response()->json([
+                'code' => 204,
+                'message' => 'Tidak ada antrian pemeriksaan'
+            ]);
+        }
+
+        
     }
 }
