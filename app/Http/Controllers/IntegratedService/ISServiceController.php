@@ -207,4 +207,6 @@ class ISServiceController extends Controller
             'token' => AuthHelper::genToken()
         ]);
     }
+
+    public function panggil(Request $request){}
 }
