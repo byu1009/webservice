@@ -625,6 +625,8 @@ class RegistrasiController extends Controller
         //kirim taskid 3
         $cekSendTaskid = IoAntrianTaskid::where('nobooking', $post2['kodebooking'])->whereNotNull('taskid_' . $post['taskid'] . '_send')->first();
 
+        return $cekSendTaskid;
+
         if($cekSendTaskid) {
             return response()->json([
                 'code' => 204,

@@ -131,7 +131,7 @@ class BPer
 
     public static function cekNoRef($noref)
     {
-        $cek = ReferensiMobilejknBpjs::where('no_rawat', $noref)->first();
+        $cek = ReferensiMobilejknBpjs::where('no_rawat', $noref)->where('status', '!=', 'Batal')->first();
 
         if ($cek) {
             return $cek->nobooking;
