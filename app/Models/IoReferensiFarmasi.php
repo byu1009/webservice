@@ -20,7 +20,7 @@ class IoReferensiFarmasi extends Model
         'jenis_resep',
         'calltime',
         'status',
-        'status_send',
+        'validasi_send',
         'json'
     ];
 }

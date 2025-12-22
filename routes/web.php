@@ -130,6 +130,7 @@ Route::middleware(['api_token'])->group(function () {
     // START FARMASI
     Route::controller(ResepController::class)->group(function () {
         Route::post('/resep/getdata', 'resepGetdata');
+        Route::post('/resep/selesai', 'resepSelesai');
     });
     // END FARMASI
 
