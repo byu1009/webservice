@@ -64,11 +64,11 @@ class ServiceFarmasiController extends Controller
 
         // START TIDAK ADA RESEP OBAT
         if ($klasifikasi == 'tidak ada') {
-            // $kirimTaskid = $this->kirimTaskidBPJS(BPer::cekNoRef($find->no_rawat));
-            $kirimTaskid = [];
+            $kirimTaskid = $this->kirimTaskidBPJS(BPer::cekNoRef($find->no_rawat));
+            // $kirimTaskid = [];
             
             $input['status'] = 'tidak ada resep';
-            // IoReferensiFarmasi::create($input);
+            IoReferensiFarmasi::create($input);
 
             return response()->json([
                 'code' => 200,
@@ -80,8 +80,8 @@ class ServiceFarmasiController extends Controller
 
         // START ADA RESEP OBAT
         if ($klasifikasi != 'tidak ada') {
-            // $kirimTaskid = $this->kirimTaskidBPJS(BPer::cekNoRef($find->no_rawat));
-            $kirimTaskid = [];
+            $kirimTaskid = $this->kirimTaskidBPJS(BPer::cekNoRef($find->no_rawat));
+            // $kirimTaskid = [];
 
             $input['prefix'] = IoJenisAntrian::where('jenis_antrian', 'like', '%' . substr($klasifikasi, 0, -2) . '%')->value('prefix');
             $input['no_antrian'] = IoReferensiFarmasi::where('tanggal', $date)
@@ -98,8 +98,10 @@ class ServiceFarmasiController extends Controller
                 'keterangan' => 'Resep obat ' . $input['jenis_resep'] . ' sedang diproses di farmasi',
             ];
 
-            $sendTaskid = new Request($json);
+            $input['json'] = json_encode($json);
+            IoReferensiFarmasi::create($input);
 
+            $sendTaskid = new Request($json);
             $apiBPJSSend = App::call(
                 'App\Http\Controllers\Jkn\JknApiAntrolController@daftarAntrianFarmasi',
                 ['request' => $sendTaskid]
@@ -116,11 +118,8 @@ class ServiceFarmasiController extends Controller
                     $message = $dResponse['message'];
                 }
 
-                if ($code == 200) {
-                    $input['validasi_send'] = $timenow;
-                    $input['json'] = json_encode($json);
-                    // IoReferensiFarmasi::create($input);
-                    
+                if ($code == 200) {       
+                    IoReferensiFarmasi::where('no_resep', $input['no_resep'])->update(['validasi_send' => $date . ' ' . $timenow]);             
                     $msgkirim[] = [
                         'code' => $code,
                         'message' => 'Sukses mengirim antrian farmasi ke BPJS'
@@ -131,13 +130,10 @@ class ServiceFarmasiController extends Controller
                     'code' => $code,
                     'message' => 'Antrian Farmasi Gagal : ' . $message
                 ];
-
-                if ($code == 200) {
-                    $taskid6 = $this->kirimTaskid6(BPer::cekNoRef($find->no_rawat));
-                    $msgkirim[] = $taskid6->getData(true);
-                }
             }
 
+            $taskid6 = $this->kirimTaskid6(BPer::cekNoRef($find->no_rawat));
+            $msgkirim[] = $taskid6->getData(true);
             // return response()->json($apiBPJSSend);
 
             return response()->json([
@@ -338,5 +334,10 @@ class ServiceFarmasiController extends Controller
 
             // return response()->json($apiBPJSSend);
         }
+
+        return response()->json([
+            'code' => 200,
+            'message' => 'TASKID 6 berhasil dibuat disimpan Temp!'
+        ]);
     }
 }
