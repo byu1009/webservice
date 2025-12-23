@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Models\ReferensiMobilejknBpjs;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Support\Str;
@@ -93,5 +94,49 @@ class BPer
         $u = self::hitungUmur1($tanggalLahir, $tanggalDaftar);
 
         return "{$u['tahun']} Th {$u['bulan']} Bl {$u['hari']} Hr";
+    }
+
+    public static function formatnoref($noref)
+    {
+        // $input = $noref;
+
+        // // Hilangkan spasi kiri/kanan
+        // $input = trim($input);
+
+        // if (preg_match('/^\d{4}\/\d{2}\/\d{2}\/\d{6}$/', $input)) {
+        //     // --------------------------
+        //     // Format A: 2025/11/07/000003
+        //     // --------------------------
+
+        //     $clean = str_replace('/', '', $input); // "20251107000003"
+
+        //     // Tindakan jika terdeteksi format A
+        //     $jenis = 'formatA';
+        // } elseif (preg_match('/^\d{14}$/', $input)) {
+        //     // --------------------------
+        //     // Format B: 20251107000003
+        //     // --------------------------
+
+        //     $clean = $input;
+
+        //     // Tindakan jika terdeteksi format B
+        //     $jenis = 'formatB';
+        // } else {
+        //     // --------------------------
+        //     // Format tidak valid
+        //     // --------------------------
+        //     return back()->withErrors(['kode' => 'Format kode tidak dikenali.']);
+        // }
+    }
+
+    public static function cekNoRef($noref)
+    {
+        $cek = ReferensiMobilejknBpjs::where('no_rawat', $noref)->where('status', '!=', 'Batal')->first();
+
+        if ($cek) {
+            return $cek->nobooking;
+        }
+
+        return $noref;
     }
 }

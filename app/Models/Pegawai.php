@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Pegawai extends Model
 {
-    public $timestamps = false; // Menonaktifkan timestamp (created_at dan updated_at)
-    protected $table = 'pegawai'; // Menentukan nama tabel
-    protected $keyType = 'int'; // Menentukan tipe data primary key
-    protected $primaryKey = 'id'; // Menentukan primary key tabel
+    public $timestamps = false;
+    protected $table = "pegawai";
+    protected $keyType = 'int';
+    protected $primaryKey = 'id';
     protected $fillable = [
         'id',
         'nik',

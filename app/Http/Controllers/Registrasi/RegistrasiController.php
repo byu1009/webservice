@@ -6,8 +6,10 @@ use App\Helpers\AuthHelper;
 use App\Helpers\BPer;
 use App\Http\Controllers\Controller;
 use App\Models\Dokter;
+use App\Models\IoAntrian;
 use App\Models\IoAntrianTaskid;
 use App\Models\IoReferensiAntrianFarmasi;
+use App\Models\Jadwal;
 use App\Models\Pasien;
 use App\Models\Poliklinik;
 use App\Models\ReferensiMobilejknBpjs;
@@ -134,6 +136,18 @@ class RegistrasiController extends Controller
             $regPeriksa->status_bayar = 'Belum Bayar';
             $regPeriksa->status_poli = (RegPeriksaModel::where('no_rkm_medis', $normedis)->where('kd_poli', $kdpoli)->where('kd_dokter', $kddokter)->count() < 1) ? 'Baru' : 'Lama';
             $regPeriksa->save();
+
+            $postAntrian = new IoAntrian();
+            $postAntrian->no_referensi = $regPeriksa->no_rawat;
+            $postAntrian->no_antrian = $regPeriksa->kd_poli . '-' . $regPeriksa->no_reg;
+            $postAntrian->status_panggil = 0;
+            $postAntrian->status_antrian = 0;
+            $postAntrian->calltime = null;
+            $postAntrian->status_pasien = 0;
+            $postAntrian->order = IoAntrian::where('no_referensi', 'like', date('Y/m/d', strtotime($tglperiksa)) . '%')
+                                ->where('no_antrian', 'like', $regPeriksa->kd_poli .'-%')
+                                ->count() + 1;
+            $postAntrian->save();
 
             $dData = DB::select("SELECT
                                     rp.no_rawat,
@@ -481,95 +495,188 @@ class RegistrasiController extends Controller
         }
     }
 
-    public function addAntrianFarmasi(Request $request)
-    {
-        $validator = Validator::make(
-            $request->all(),
-            [
-                'kodebooking'   => 'required|string',
-                'jenisresep'    => 'required|string|in:tidak ada,racikan,non racikan',
-                'keterangan'    => 'required|string',
-            ],
-            [
-                'kodebooking.required'  => 'kodebooking tidak boleh kosong.',
-                'jenisresep.required'   => 'jenisresep tidak boleh kosong.',
-                'jenisresep.in'         => 'jenisresep hanya boleh diisi racikan atau non racikan.',
-                'keterangan.required'   => 'keterangan tidak boleh kosong.',
-            ]
-        );
+    // public function addAntrianFarmasi(Request $request)
+    // {
+    //     $validator = Validator::make(
+    //         $request->all(),
+    //         [
+    //             'kodebooking'   => 'required|string',
+    //             'jenisresep'    => 'required|string|in:tidak ada,racikan,non racikan',
+    //             'keterangan'    => 'required|string',
+    //         ],
+    //         [
+    //             'kodebooking.required'  => 'kodebooking tidak boleh kosong.',
+    //             'jenisresep.required'   => 'jenisresep tidak boleh kosong.',
+    //             'jenisresep.in'         => 'jenisresep hanya boleh diisi racikan atau non racikan.',
+    //             'keterangan.required'   => 'keterangan tidak boleh kosong.',
+    //         ]
+    //     );
+
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'code'    => 204,
+    //             'message' => $validator->errors()->first(),
+    //         ], 200);
+    //     }
+
+    //     $nobooking = $request->kodebooking;
+
+    //     //cek antrian
+    //     $refAntrol = ReferensiMobilejknBpjs::where('nobooking', $nobooking)->first();
+
+    //     if (!$refAntrol) {
+    //         return response()->json([
+    //             'code' => 201,
+    //             'message' => 'Referensi Antrian tidak ditemukan'
+    //         ]);
+    //     }
+
+    //     if ($refAntrol->status == 'Batal') {
+    //         return response()->json([
+    //             'code' => 201,
+    //             'message' => 'Gagal proses, Pendaftaran antrian sudah dibatalkan!'
+    //         ]);
+    //     }
+
+    //     $cari = IoReferensiAntrianFarmasi::find($nobooking);
+
+    //     if ($cari) {
+    //         return response()->json([
+    //             'code' => 201,
+    //             'message' => 'Antrian farmasi dengan nobooking ' . $nobooking . ' sudah ada!'
+    //         ]);
+    //     }
+
+    //     $cariMax = IoReferensiAntrianFarmasi::where('tgl', $refAntrol->tanggalperiksa)->count();
+
+    //     $data = [
+    //         'nobooking' => $nobooking,
+    //         'jenisresep' => $request->jenisresep,
+    //         'nomorantrean' => (int)($cariMax + 1),
+    //         'keterangan' => $request->keterangan,
+    //         'tgl' => $refAntrol->tanggalperiksa
+    //     ];
+
+    //     $apiSend = new Request($data);
+
+    //     $apiResponse = App::call(
+    //         'App\Http\Controllers\Jkn\JknApiAntrolController@daftarAntrianFarmasi',
+    //         ['request' => $apiSend]
+    //     );
+
+    //     if ($apiResponse instanceof JsonResponse) {
+    //         $decodeResponse = $apiResponse->getData(true);
+
+    //         if ($decodeResponse['code'] == 200) {
+    //             $data['validasi'] = Carbon::now()->format('Y-m-d H:i:s');
+
+    //             IoReferensiAntrianFarmasi::create($data);
+
+    //             return response()->json([
+    //                 'code' => 200,
+    //                 'message' => 'Pendaftaran Antrian Farmasi berhasil',
+    //                 'data' => [
+    //                     'nobooking' => $data['nobooking'],
+    //                     'noantrian' => $data['nomorantrean'],
+    //                 ],
+    //                 'token' => AuthHelper::genToken(),
+    //             ]);
+    //         }
+
+    //         return response()->json($decodeResponse);
+    //     }
+
+    //     return response()->json($apiResponse);
+    // }
+
+    public function checkin(Request $request) {
+        $rules = [
+            'norawat'   => 'required|string',
+        ];
+
+        $messages = [
+            'required'  => ':attribute tidak boleh kosong',
+            'string'    => ':attribute harus berupa string',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
             return response()->json([
-                'code'    => 204,
-                'message' => $validator->errors()->first(),
-            ], 200);
-        }
-
-        $nobooking = $request->kodebooking;
-
-        //cek antrian
-        $refAntrol = ReferensiMobilejknBpjs::where('nobooking', $nobooking)->first();
-
-        if (!$refAntrol) {
-            return response()->json([
-                'code' => 201,
-                'message' => 'Referensi Antrian tidak ditemukan'
+                'code'    => 201,
+                'message' => $validator->errors()->first()
             ]);
         }
 
-        if ($refAntrol->status == 'Batal') {
-            return response()->json([
-                'code' => 201,
-                'message' => 'Gagal proses, Pendaftaran antrian sudah dibatalkan!'
-            ]);
-        }
-
-        $cari = IoReferensiAntrianFarmasi::find($nobooking);
-
-        if ($cari) {
-            return response()->json([
-                'code' => 201,
-                'message' => 'Antrian farmasi dengan nobooking ' . $nobooking . ' sudah ada!'
-            ]);
-        }
-
-        $cariMax = IoReferensiAntrianFarmasi::where('tgl', $refAntrol->tanggalperiksa)->count();
-
-        $data = [
-            'nobooking' => $nobooking,
-            'jenisresep' => $request->jenisresep,
-            'nomorantrean' => (int)($cariMax + 1),
-            'keterangan' => $request->keterangan,
-            'tgl' => $refAntrol->tanggalperiksa
+        $norawat = $request->norawat;
+        $noref = BPer::cekNoRef($norawat);
+        $find = RegPeriksaModel::where('no_rawat', $norawat)->first();
+        $jadwal = Jadwal::where('kd_dokter', $find->kd_dokter)
+                    ->where('kd_poli', $find->kd_poli)
+                    ->where('hari_kerja', BPer::tebakHari($find->tgl_registrasi))
+                    ->first();
+        $waktuNow = date('Y-m-d H:i:s');
+        $post = [
+            'kodebooking' => $noref,
+            'taskid' => '3',
+            'waktu' => (date('H:i:s', strtotime($waktuNow)) < $jadwal->jam_mulai) ? date('Y-m-d', strtotime($waktuNow)) . ' ' . $jadwal->jam_mulai : $waktuNow,
         ];
 
-        $apiSend = new Request($data);
+        $post2 = [
+            'kodebooking' => $noref,
+            'taskid' => $post['taskid'],
+            'waktu' => strtotime($post['waktu']) * 1000,
+        ];
 
+        //kirim taskid 3
+        $cekSendTaskid = IoAntrianTaskid::where('nobooking', $post2['kodebooking'])->whereNotNull('taskid_' . $post['taskid'])->first();
+
+        if($cekSendTaskid) {
+            return response()->json([
+                'code' => 204,
+                'message' => 'Pasien sudah checkin'
+            ]);
+        }
+
+        $apiSend = new Request($post);
         $apiResponse = App::call(
-            'App\Http\Controllers\Jkn\JknApiAntrolController@daftarAntrianFarmasi',
+            'App\Http\Controllers\Jkn\JknTaskidController@post',
             ['request' => $apiSend]
         );
 
         if ($apiResponse instanceof JsonResponse) {
             $decodeResponse = $apiResponse->getData(true);
 
-            if ($decodeResponse['code'] == 200) {
-                $data['validasi'] = Carbon::now()->format('Y-m-d H:i:s');
+            if ($decodeResponse['code'] != 200) {
+                return $decodeResponse;
+            }
 
-                IoReferensiAntrianFarmasi::create($data);
+            $sendTaskid = new Request($post2);
+            $apiBPJSSend = App::call(
+                'App\Http\Controllers\Jkn\JknApiAntrolController@updateWaktuAntrian',
+                ['request' => $sendTaskid]
+            );
+
+            if ($apiBPJSSend instanceof JsonResponse) {
+                $dResponse = $apiBPJSSend->getData(true);
+
+                if ($dResponse['metadata']['code'] == 200) {
+                    IoAntrianTaskid::where('nobooking', $post2['kodebooking'])->update(['taskid_' . $post['taskid'] . '_send' => date('Y-m-d H:i:s')]);
+
+                    return response()->json([
+                        'code' => 200,
+                        'message' => 'Checkin berhasil',
+                        'token' => AuthHelper::genToken(),
+                    ]);
+                }
 
                 return response()->json([
                     'code' => 200,
-                    'message' => 'Pendaftaran Antrian Farmasi berhasil',
-                    'data' => [
-                        'nobooking' => $data['nobooking'],
-                        'noantrian' => $data['nomorantrean'],
-                    ],
+                    'message' => 'Checkin berhasil, TASKID 3 belum terkirim',
+                    'message_bpjs' => $dResponse,
                     'token' => AuthHelper::genToken(),
                 ]);
             }
-
-            return response()->json($decodeResponse);
         }
 
         return response()->json($apiResponse);

@@ -57,4 +57,18 @@ class RegPeriksaModel extends Model
     {
         return $this->hasOne('App\Models\SatuSehatMappingLokasiRalan','kd_poli','kd_poli')->select(['kd_poli','id_organisasi_satusehat','id_lokasi_satusehat']);
     }
+    public function dokter()
+    {
+        return $this->hasOne(Dokter::class, 'kd_dokter', 'kd_dokter');
+    }
+
+    public function poli()
+    {
+        return $this->hasOne(Poliklinik::class, 'kd_poli', 'kd_poli');
+    }
+
+    public function penjab()
+    {
+        return $this->hasOne(Penjab::class, 'kd_pj', 'kd_pj');
+    }
 }
