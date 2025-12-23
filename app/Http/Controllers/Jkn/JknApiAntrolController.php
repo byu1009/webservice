@@ -531,7 +531,7 @@ class JknApiAntrolController extends Controller
         $err = curl_error($curl);
 
         $decode = json_decode($response, true);
-
+        // return response()->json($response);
         if ($decode['metadata']['code'] != 200) {
             $code = $decode['metadata']['code'];
             $message = $decode['metadata']['message'];

@@ -46,4 +46,15 @@ class Pegawai extends Model
         'photo',
         'no_ktp'
     ];
+
+    // Jika ada kolom yang berhubungan dengan tanggal, seperti tgl_lahir, mulai_kerja, etc.
+    protected $dates = [
+        'tgl_lahir',
+        'mulai_kerja',
+        'mulai_kontrak'
+    ];
+    public function practitioner()
+    {
+        return $this->hasOne('App\Models\SatuSehatPractitioner','no_ktp','no_ktp');
+    }
 }
