@@ -125,7 +125,7 @@ class RadiologiRequestController extends Controller
         $serviceRequest?:$serviceRequest=new SatuSehatServiceRequestRadiologi();
         $serviceRequest->noorder = $request->noorder;
         $serviceRequest->kd_jenis_prw = $request->kd_jenis_prw;
-        $serviceRequest->id_servicerequest = $request->kd_jenis_prw;
+        $serviceRequest->id_servicerequest = $data->id;
         $serviceRequest->save();
         return response()->json([
             'code' => $code,

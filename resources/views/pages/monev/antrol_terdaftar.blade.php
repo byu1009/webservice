@@ -16,7 +16,7 @@
             <label for="formTgl" class="col-form-label">Tanggal Pantauan</label>
         </div>
         <div class="col-auto">
-            <input type="date" id="formTgl" class="form-control" aria-describedby="tglform" value="{{  date('Y-m-d'); }}">
+            <input type="date" id="formTgl" class="form-control" aria-describedby="tglform" value="{{  date('Y-m-d') }}">
         </div>
         <div class="col-auto">
             <button type="button" id="btnCari" class="btn btn-success">Cari</button>

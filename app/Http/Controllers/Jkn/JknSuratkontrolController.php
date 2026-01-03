@@ -6,6 +6,7 @@ use App\Helpers\AuthHelper;
 use App\Helpers\BPer;
 use App\Http\Controllers\Controller;
 use App\Models\BridgingSuratKontrolBpjs;
+use App\Models\Jadwal;
 use Illuminate\Http\Request;
 
 class JknSuratkontrolController extends Controller
@@ -50,6 +51,21 @@ class JknSuratkontrolController extends Controller
             'code' => ($carisurkon) ? 200 : 204,
             'message' => ($carisurkon) ? 'Ok' : 'Data tidak ditemukan!',
             'data' => ($carisurkon) ? $carisurkon : null,
+            'token' => AuthHelper::genToken(),
+        ]);
+    }
+    function getPlan(Request $request) {
+        $day=BPer::tebakHari($request->tgl_rencana);
+        $jadwal=Jadwal::join('maping_dokter_dpjpvclaim','maping_dokter_dpjpvclaim.kd_dokter','=','jadwal.kd_dokter')
+        ->join('maping_poli_bpjs','maping_poli_bpjs.kd_poli_rs','=','jadwal.kd_poli')
+        ->where('kd_poli_bpjs','=',$request->kd_poli_bpjs)
+        ->where('kd_dokter_bpjs','=',$request->kd_dokter_bpjs)
+        ->where('hari_kerja','=',$day)
+        ->first();
+        return response()->json([
+            'code' => ($jadwal) ? 200 : 204,
+            'message' => ($jadwal) ? 'Ok' : 'Data tidak ditemukan!',
+            'data' => ($jadwal) ? $jadwal : null,
             'token' => AuthHelper::genToken(),
         ]);
     }
