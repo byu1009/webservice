@@ -48,9 +48,11 @@ class ReferensiController extends Controller
 
     public function kabupaten(Request $request)
     {
-        $data = Kabupaten::select('kd_kab', 'nm_kab')
-            ->where('nm_kab', 'LIKE', $request->key . '%')
-            ->limit(100)
+        $data = Kabupaten::select('kd_kab', 'kd_kab as kode', 'nm_kab', 'nm_kab as nama');
+        if($request){
+            $data = $data->where('nm_kab', 'LIKE', $request->key . '%');
+        }
+        $data = $data->limit(100)
             ->get();
 
         return response()->json($data);

@@ -210,6 +210,7 @@ use App\Http\Controllers\Radiologi\WorklistController;
     Route::put('/satu-sehat/radiologi/service-request',  [RadiologiRequestController::class, 'update']);
     Route::post('/satu-sehat/radiologi/imaging-study/upload',  [ImagingStudiesController::class, 'upload']);
     Route::post('/satu-sehat/radiologi/imaging-study/upload/{acsn}', [ImagingStudiesController::class, 'upload']);
+    Route::delete('/satu-sehat/radiologi/imaging-study/delete/{study_id}', [ImagingStudiesController::class, 'delete']);
     Route::post('/satu-sehat/radiologi/imaging-study/send-to-modality/{modality}',  [ImagingStudiesController::class, 'sendToModality']);
     Route::get('/satu-sehat/radiologi/imaging-study/retrieve/{acsn}',  [ImagingStudiesController::class, 'getCloudData']);
     

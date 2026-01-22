@@ -188,6 +188,20 @@ class ImagingStudiesController extends Controller
         }
     }
 
+    public function delete(string $studyId)
+    {
+        $resp = Http::delete(config('services.orthanc.url') . "/studies/{$studyId}");
+        if (!$resp->successful()) {
+            throw new \Exception("Gagal menghapus study {$studyId}");
+        }
+        IoStatuSehatImagingStudy::where('study_id','=',$studyId)->delete();
+        return response()->json([
+            'code' => 200,
+            'message' => 'Hapus Gambar & ImagingStudy berhasil',
+            'data' => null,
+        ], 200);
+    }
+
     /* =====================================================
      * SEND TO MODALITY
      * ===================================================== */
