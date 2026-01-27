@@ -92,6 +92,7 @@ Route::middleware(['api_token'])->group(function () {
 
     // START REGISTRASI
     Route::controller(RegistrasiController::class)->group(function () {
+        Route::post('/registrasi/get-rajal', 'getDataRajal');
         Route::post('/registrasi/getdata', 'getdata');
         Route::post('/registrasi/post', 'post');
         Route::post('/registrasi/add-antrol', 'addantrian');

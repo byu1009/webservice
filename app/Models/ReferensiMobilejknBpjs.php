@@ -36,5 +36,10 @@ class ReferensiMobilejknBpjs extends Model
         'validasi', 
         'statuskirim'
     ];
+
+    public function taskid()
+    {
+        return $this->hasOne(IoAntrianTaskid::class, 'nobooking', 'nobooking');
+    }
     
 }
