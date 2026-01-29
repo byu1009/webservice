@@ -88,8 +88,13 @@ class ImagingStudiesController extends Controller
                 $client->get("/instances/{$instanceIds[0]}")->getBody(),
                 true
             );
-
-            $studyId = $instanceInfo['ParentStudy'];
+            $seriesId = $instanceInfo['ParentSeries'];
+            $seriesInfo = json_decode(
+                $client->get("/series/{$seriesId}")->getBody(),
+                true
+            );
+            $studyId = $seriesInfo['ParentStudy'];
+            // return response()->json($studyId,409);
 
             /* 4️⃣ Modify Accession */
             $modify = $client->post("/studies/{$studyId}/modify", [
@@ -146,14 +151,15 @@ class ImagingStudiesController extends Controller
                     ['acsn' => $acsn]
                 );
             }
-
-            return $this->success('Upload DICOM & ImagingStudy berhasil', [
-                'study_id' => $finalStudy['ID'],
-                'study_uid' => $studyUid
-            ]);
+            
+            return response()->json([
+                'code' => 200,
+                'message' => 'Upload DICOM & ImagingStudy berhasil',
+                'data' => $imagingStudy,
+            ], 200);
 
         } catch (\Throwable $e) {
-            return $this->error('Gagal memproses Imaging Study', 500, $e->getMessage());
+            return $this->error('Gagal memproses Imaging Study', 500, 'Line: '.$e->getLine().' - '.$e->getMessage());
         }
     }
 
@@ -180,6 +186,20 @@ class ImagingStudiesController extends Controller
         if (!$resp->successful()) {
             throw new \Exception("Gagal menghapus study {$studyId}");
         }
+    }
+
+    public function delete(string $studyId)
+    {
+        $resp = Http::delete(config('services.orthanc.url') . "/studies/{$studyId}");
+        if (!$resp->successful()) {
+            throw new \Exception("Gagal menghapus study {$studyId}");
+        }
+        IoStatuSehatImagingStudy::where('study_id','=',$studyId)->delete();
+        return response()->json([
+            'code' => 200,
+            'message' => 'Hapus Gambar & ImagingStudy berhasil',
+            'data' => null,
+        ], 200);
     }
 
     /* =====================================================
@@ -267,9 +287,9 @@ class ImagingStudiesController extends Controller
             $data = $resp->json();
 
             if (($data['total'] ?? 0) === 0) {
-                return $this->error('Data ImagingStudy tidak ditemukan di SATUSEHAT', 204);
+                
+                return $this->error('Data ImagingStudy tidak ditemukan di SATUSEHAT', 201, $data);
             }
-
             $local = IoStatuSehatImagingStudy::find($acsn);
             if (!$local) {
                 return $this->error('ImagingStudy belum ada di lokal', 404);
@@ -278,13 +298,20 @@ class ImagingStudiesController extends Controller
             $local->id_imaging_study = $data['entry'][0]['resource']['id'];
             $local->save();
 
+            // return $local;
             return $this->success(
                 'ImagingStudy berhasil sinkron ke SATUSEHAT',
                 $local->id_imaging_study
             );
 
         } catch (\Throwable $e) {
-            return $this->error('Gagal mengambil data SATUSEHAT', 500, $e->getMessage());
+            return response()->json([
+                'code' => 500,
+                'message' => 'Gagal mengambil data SATUSEHAT',
+                'data' => $e->getMessage(),
+                'trace'=>$e->__tostring()
+            ], 200);
+            // return $this->error('Gagal mengambil data SATUSEHAT', 500, $e->getMessage());
         }
     }
 }

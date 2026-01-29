@@ -28,7 +28,24 @@ class RegistrasiController extends Controller
     public function getdata(Request $request)
     {
         $data = RegPeriksaModel::with(['pasien','doctor','policlinic','asuransi'])->whereBetween('tgl_registrasi', [date('Y-m-d',strtotime($request->tglawal)), date('Y-m-d',strtotime($request->tglakhir))])->get();
-
+        return response()->json([
+            'code' => 200,
+            'message' => 'Data ada',
+            'data' => $data,
+        ]);
+    }
+    public function getDataRajal(Request $request)
+    {
+        $data = RegPeriksaModel::with(['pasien','doctor','policlinic','asuransi','booking'])->whereBetween('tgl_registrasi', [date('Y-m-d',strtotime($request->tglawal)), date('Y-m-d',strtotime($request->tglakhir))])->where('status_lanjut','=','Ralan')->get();
+        return response()->json([
+            'code' => 200,
+            'message' => 'Data ada',
+            'data' => $data,
+        ]);
+    }
+    public function getDataRanap(Request $request)
+    {
+        $data = RegPeriksaModel::with(['pasien','doctor','policlinic','asuransi'])->whereBetween('tgl_registrasi', [date('Y-m-d',strtotime($request->tglawal)), date('Y-m-d',strtotime($request->tglakhir))])->where('status_lanjut','=','Ranap')->get();
         return response()->json([
             'code' => 200,
             'message' => 'Data ada',

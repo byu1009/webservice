@@ -71,4 +71,9 @@ class RegPeriksaModel extends Model
     {
         return $this->hasOne(Penjab::class, 'kd_pj', 'kd_pj');
     }
+
+    public function booking()
+    {
+        return $this->hasOne(ReferensiMobilejknBpjs::class, 'no_rawat', 'no_rawat')->with('taskid')->where('status','!=','Batal');
+    }
 }

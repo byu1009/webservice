@@ -66,4 +66,20 @@ class BridgingSep extends Model
         'kddpjplayanan',
         'nmdpjplayanan'
     ];
+    public function skdpAsal()
+    {
+        return $this->hasOne('App\Models\BridgingSuratKontrolBpjs','no_surat','noskdp');
+    }
+    public function pasien()
+    {
+        return $this->hasOne(Pasien::class,'no_rkm_medis','nomr')
+        ->select([
+            'no_rkm_medis',
+            'nm_pasien',
+            'alamat',
+            'namakeluarga',
+            'keluarga',
+            'alamatpj',
+        ]);
+    }
 }

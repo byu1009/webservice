@@ -6,6 +6,9 @@ use App\Helpers\AuthHelper;
 use App\Helpers\BPer;
 use App\Http\Controllers\Controller;
 use App\Models\IoUser;
+use App\Models\Kabupaten;
+use App\Models\Kecamatan;
+use App\Models\Kelurahan;
 use App\Models\Pasien;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -95,10 +98,10 @@ class PasienController extends Controller
             'pekerjaanpj'   => 'required',
             'alamatpj'      => 'required',
 
-            'kelurahanpj'   => 'required|exists:kelurahan,kd_kel',
-            'kecamatanpj'   => 'required|exists:kecamatan,kd_kec',
-            'kabupatenpj'   => 'required|exists:kabupaten,kd_kab',
-            'propinsipj'    => 'required|exists:propinsi,kd_prop',
+            'kelurahanpj'   => 'required',
+            'kecamatanpj'   => 'required',
+            'kabupatenpj'   => 'required',
+            'propinsipj'    => 'required',
 
             'sukubangsa'    => 'required',
             'bahasa'        => 'required',
@@ -137,10 +140,10 @@ class PasienController extends Controller
             'kabupaten.exists' => 'Kabupaten tidak ditemukan',
             'propinsi.exists' => 'Propinsi tidak ditemukan',
 
-            'kelurahanpj.exists' => 'Kelurahan penanggungjawab tidak ditemukan',
-            'kecamatanpj.exists' => 'Kecamatan penanggungjawab tidak ditemukan',
-            'kabupatenpj.exists' => 'Kabupaten penanggungjawab tidak ditemukan',
-            'propinsipj.exists'  => 'Propinsi penanggungjawab tidak ditemukan',
+            // 'kelurahanpj.exists' => 'Kelurahan penanggungjawab tidak ditemukan',
+            // 'kecamatanpj.exists' => 'Kecamatan penanggungjawab tidak ditemukan',
+            // 'kabupatenpj.exists' => 'Kabupaten penanggungjawab tidak ditemukan',
+            // 'propinsipj.exists'  => 'Propinsi penanggungjawab tidak ditemukan',
 
             'tgldaftar.date_format' => 'Format tanggal daftar harus Y-m-d',
         ];
@@ -185,7 +188,12 @@ class PasienController extends Controller
 
             'tgldaftar' => 'Tanggal daftar',
         ];
-
+        $kab=Kabupaten::find($request->kabupaten);
+        $kab?:Kabupaten::insert(['kd_kab'=>$request->kabupaten,'nm_kab'=>$request->nmkabupaten]);
+        $kec=Kecamatan::find($request->kecamatan);
+        $kec?:Kecamatan::insert(['kd_kec'=>$request->kecamatan,'nm_kec'=>$request->nmkecamatan]);
+        $kel=Kelurahan::find($request->kelurahan);
+        $kel?:Kelurahan::insert(['kd_kel'=>$request->kelurahan,'nm_kel'=>$request->nmkelurahan]);
         $validator = Validator::make($request->all(), $rules, $messages);
         $validator->setAttributeNames($customNames);
 
@@ -203,6 +211,7 @@ class PasienController extends Controller
         $validPasien = Pasien::where('no_ktp', $request->ktpsim)->first();
 
         if ($validPasien) {
+            // if ($validPasien->no_rkm_medis == $request) {
             if (!$request->confirmed) {
                 return response()->json([
                     'code' => 201,

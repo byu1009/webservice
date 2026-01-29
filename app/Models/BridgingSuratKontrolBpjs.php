@@ -24,7 +24,8 @@ class BridgingSuratKontrolBpjs extends Model
     ];
     public function sepAsal()
     {
-        return $this->hasOne('App\Models\BridgingSEP','no_sep','no_sep')
+        return $this->hasOne(BridgingSep::class,'no_sep','no_sep')
+        ->with(['pasien'])
         ->select([
             'no_sep',
             'noskdp',

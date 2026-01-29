@@ -14,6 +14,7 @@ use App\Http\Controllers\Master\PoliklinikController;
 use App\Http\Controllers\Master\ReferensiController;
 use App\Http\Controllers\Radiologi\PermintaanController;
 use App\Http\Controllers\Monev\MonevController;
+use App\Http\Controllers\Radiologi\StorageController;
 use App\Http\Controllers\Rajal\Antrian\AntrianRJController;
 use App\Http\Controllers\Rajal\Antrian\DashboardRjController;
 use App\Http\Controllers\Registrasi\RegistrasiController;
@@ -25,10 +26,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::post('/login', action: [AuthController::class, 'login']);
-Route::post('/auth/check-username', action: [AuthController::class, 'checkUsername']);
-Route::post('/check', action: [AuthController::class, 'check']);
-Route::get('/auth/login-data', action: [AuthController::class, 'loginData']);
+Route::post('/login',  [AuthController::class, 'login']);
+Route::post('/auth/check-username',  [AuthController::class, 'checkUsername']);
+Route::post('/check',  [AuthController::class, 'check']);
+Route::get('/auth/login-data',   [AuthController::class, 'loginData']);
 
 Route::middleware(['api_token'])->group(function () {
     Route::controller(UserController::class)->group(function () {
@@ -79,6 +80,7 @@ Route::middleware(['api_token'])->group(function () {
     // START JKN
     Route::controller(JknSuratkontrolController::class)->group(function () {
         Route::post('/jkn/surkon/getdata', 'getdata');
+        Route::post('/jkn/surkon/get-jadwal', 'getPlan');
     });
 
     Route::controller(JknTaskidController::class)->group(function () {
@@ -90,6 +92,7 @@ Route::middleware(['api_token'])->group(function () {
 
     // START REGISTRASI
     Route::controller(RegistrasiController::class)->group(function () {
+        Route::post('/registrasi/get-rajal', 'getDataRajal');
         Route::post('/registrasi/getdata', 'getdata');
         Route::post('/registrasi/post', 'post');
         Route::post('/registrasi/add-antrol', 'addantrian');
@@ -142,10 +145,10 @@ Route::middleware(['api_token'])->group(function () {
         });
     });
 
-    Route::get('/master/poliklinik', action: [PoliklinikController::class, 'index']);
-    Route::post('/master/poliklinik', action: [PoliklinikController::class, 'store']);
-    Route::get('/master/dokter', action: [DokterController::class, 'index']);
-    Route::post('/master/dokter', action: [DokterController::class, 'store']);
+    Route::get('/master/poliklinik',  [PoliklinikController::class, 'index']);
+    Route::post('/master/poliklinik',  [PoliklinikController::class, 'store']);
+    Route::get('/master/dokter',  [DokterController::class, 'index']);
+    Route::post('/master/dokter',  [DokterController::class, 'store']);
 });
 
 // START API ANTROL
@@ -181,9 +184,9 @@ Route::controller(MonevController::class)->group(function () {
     Route::post('monev/antrian-terdaftar/api', 'antrolTerdaftarApi')->name('monev.antrolterdaftar.api');
     Route::post('monev/antrian-terdaftar/batal', 'antrolTerdaftarBatal')->name('monev.antrolterdaftar.batal');
 });
-    Route::get('/master/jadwal-praktek/tanggal', action: [JadwalPraktekController::class, 'getByDate']);
-    Route::get('/master/jadwal-praktek/tanggal/{date}', action: [JadwalPraktekController::class, 'getByDate']);
-    Route::get('/radiologi/permintaan', action: [PermintaanController::class, 'getEncounter']);
+    Route::get('/master/jadwal-praktek/tanggal',  [JadwalPraktekController::class, 'getByDate']);
+    Route::get('/master/jadwal-praktek/tanggal/{date}',  [JadwalPraktekController::class, 'getByDate']);
+    Route::get('/radiologi/permintaan',  [PermintaanController::class, 'getData']);
 
 
 
@@ -198,18 +201,21 @@ use App\Http\Controllers\SatuSehat\RadiologiRequestController;
 use App\Http\Controllers\SatuSehat\ImagingStudiesController;
 use App\Http\Controllers\Radiologi\WorklistController;
 
-    Route::get('/phpinfo', function () {phpinfo();});
-    Route::get('/satu-sehat/auth', action: [SatuSehatAuthController::class, 'auth']);
-    Route::get('/satu-sehat/patient/{nik}', action: [SatuSehatPatientController::class, 'getOne']);
-    Route::get('/satu-sehat/practitioner/{nik}', action: [SatuSehatPractitionerController::class, 'getOne']);
-    Route::get('/satu-sehat/lokasi-ralan/{nik}', action: [LokasiRalanController::class, 'getOne']);
+    Route::get('/phpinfo',  function () {phpinfo();});
+    Route::get('/satu-sehat/auth',  [SatuSehatAuthController::class, 'auth']);
+    Route::get('/satu-sehat/patient/{nik}',  [SatuSehatPatientController::class, 'getOne']);
+    Route::get('/satu-sehat/practitioner/{nik}',  [SatuSehatPractitionerController::class, 'getOne']);
+    Route::get('/satu-sehat/lokasi-ralan/{nik}',  [LokasiRalanController::class, 'getOne']);
     Route::post('/satu-sehat/encounter', action: [EncounterController::class, 'store']);
-    Route::post('/satu-sehat/radiologi/service-request', action: [RadiologiRequestController::class, 'store']);
-    Route::put('/satu-sehat/radiologi/service-request', action: [RadiologiRequestController::class, 'update']);
-    Route::post('/satu-sehat/radiologi/imaging-study/upload', action: [ImagingStudiesController::class, 'upload']);
-    Route::post('/satu-sehat/radiologi/imaging-study/upload/{acsn}', action: [ImagingStudiesController::class, 'upload']);
-    Route::post('/satu-sehat/radiologi/imaging-study/send-to-modality/{modality}', action: [ImagingStudiesController::class, 'sendToModality']);
-    Route::get('/satu-sehat/radiologi/imaging-study/retrieve/{acsn}', action: [ImagingStudiesController::class, 'getCloudData']);
+    Route::post('/satu-sehat/radiologi/service-request',  [RadiologiRequestController::class, 'store']);
+    Route::put('/satu-sehat/radiologi/service-request',  [RadiologiRequestController::class, 'update']);
+    Route::post('/satu-sehat/radiologi/imaging-study/upload',  [ImagingStudiesController::class, 'upload']);
+    Route::post('/satu-sehat/radiologi/imaging-study/upload/{acsn}', [ImagingStudiesController::class, 'upload']);
+    Route::delete('/satu-sehat/radiologi/imaging-study/delete/{study_id}', [ImagingStudiesController::class, 'delete']);
+    Route::post('/satu-sehat/radiologi/imaging-study/send-to-modality/{modality}',  [ImagingStudiesController::class, 'sendToModality']);
+    Route::get('/satu-sehat/radiologi/imaging-study/retrieve/{acsn}',  [ImagingStudiesController::class, 'getCloudData']);
     
-    Route::get('/radiologi/worklist/generate', action: [WorklistController::class, 'generate']);
-    Route::get('/radiologi/worklist/generate/{date}', action: [WorklistController::class, 'generate']);
+    Route::get('/radiologi/worklist/generate',  [WorklistController::class, 'generate']);
+    Route::get('/radiologi/worklist/generate/{date}',  [WorklistController::class, 'generate']);
+    Route::get('/radiologi/storage/get-study-at/{date}',  [StorageController::class, 'getSeriesByDate']);
+    Route::post('/radiologi/storage/set-imaging-study',  [StorageController::class, 'setImagingStudy']);
